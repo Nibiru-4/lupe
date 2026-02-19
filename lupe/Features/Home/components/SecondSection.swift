@@ -9,6 +9,9 @@ import SwiftUI
 
 struct SecondSection : View {
     
+    let champions: [Champion]
+    let onChampionTap: (Champion) -> Void
+    
     var body : some View {
         VStack(spacing:24) {
             HStack( spacing: 16) {
@@ -17,14 +20,17 @@ struct SecondSection : View {
             }
             .frame(maxWidth: .infinity,alignment: .leading)
             
-            VStack {
-                HStack( spacing: 16) {
-                    CustomCard(title: "Ahri", urlImage: "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_0.jpg")
-                    CustomCard(title: "Yasuo",urlImage: "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_0.jpg")
-                }
-                HStack( spacing: 16) {
-                    CustomCard(title: "Tryndamere",urlImage: "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Tryndamere_0.jpg")
-                    CustomCard(title: "Jax", urlImage: "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Jax_0.jpg")
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                ForEach(champions) { champion in
+                    Button {
+                        onChampionTap(champion)
+                    } label: {
+                        CustomCard(
+                            title: champion.name,
+                            urlImage: champion.splashURL?.absoluteString ?? ""
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
             }
             .frame(maxWidth: .infinity)

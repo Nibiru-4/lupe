@@ -8,9 +8,15 @@ import SwiftUI
 
 struct FirstSection : View {
     
-    @State var text : String = ""
+    @Binding var text : String
+    var onSubmit: (() -> Void)? = nil
     
     var body : some View {
-        CustomTextField(placeholder: "Search Champions or Users...", icon:"magnifyingglass", text: $text)
+        CustomTextField(
+            placeholder: "Search Champions or Users...",
+            icon:"magnifyingglass",
+            text: $text,
+            onSubmit: onSubmit
+        )
     }
 }

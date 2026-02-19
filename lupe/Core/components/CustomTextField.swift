@@ -12,6 +12,7 @@ struct CustomTextField: View {
     var placeholder : String
     let icon : String // SF symbol string
     @Binding var text: String
+    var onSubmit: (() -> Void)? = nil
     @FocusState var isFocused: Bool
     
     var body: some View {
@@ -21,6 +22,10 @@ struct CustomTextField: View {
                 .foregroundColor(.gray)
             
             TextField(placeholder,text: $text)
+                .submitLabel(.search)
+                .onSubmit {
+                    onSubmit?()
+                }
             
             if(!text.isEmpty){
                 Button(action : {
