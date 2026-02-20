@@ -25,4 +25,8 @@ struct Champion : Codable, Identifiable, Hashable {
     var splashURL: URL? {
         URL(string: "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/\(id)_0.jpg")
     }
+    
+    static func itemIconURL(for itemId: Int) -> URL? {
+        URL(string: "https://ddragon.leagueoflegends.com/cdn/\(Self.cdnVersion)/img/item/\(itemId).png")
+    }
 }

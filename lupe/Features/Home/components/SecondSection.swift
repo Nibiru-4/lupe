@@ -10,6 +10,7 @@ import SwiftUI
 struct SecondSection : View {
     
     let champions: [Champion]
+    let statsByChampionName: [String: ChampionStats]
     let onChampionTap: (Champion) -> Void
     
     var body : some View {
@@ -27,7 +28,9 @@ struct SecondSection : View {
                     } label: {
                         CustomCard(
                             title: champion.name,
-                            urlImage: champion.splashURL?.absoluteString ?? ""
+                            urlImage: champion.splashURL?.absoluteString ?? "",
+                            winRate: statsByChampionName[champion.name.lowercased()]?.winRate,
+                            pickRate: statsByChampionName[champion.name.lowercased()]?.pickRate
                         )
                     }
                     .buttonStyle(.plain)

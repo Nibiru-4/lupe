@@ -4,6 +4,8 @@ struct CustomCard: View {
     
     let title: String
     let urlImage : String
+    let winRate: Double?
+    let pickRate: Double?
     
     var body: some View {
         VStack(spacing: 8) {
@@ -41,14 +43,14 @@ struct CustomCard: View {
             HStack(spacing: 16) {
                 Text("Win Rate")
                 Spacer()
-                Text("52%")
+                Text(formattedPercent(winRate))
                     .bold()
             }
             
             HStack(spacing: 16) {
                 Text("Pick Rate")
                 Spacer()
-                Text("2.9%")
+                Text(formattedPercent(pickRate))
                     .bold()
             }
         }
@@ -56,5 +58,10 @@ struct CustomCard: View {
         .background(Color(red: 0x1a/255, green: 0x1b/255, blue: 0x27/255))
         .cornerRadius(12)
         .shadow(radius: 4)
+    }
+    
+    private func formattedPercent(_ value: Double?) -> String {
+        guard let value else { return "--" }
+        return String(format: "%.1f%%", value)
     }
 }

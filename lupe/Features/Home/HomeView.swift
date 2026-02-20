@@ -18,6 +18,9 @@ struct HomeView: View {
     @State private var searchText = ""
     @State private var path = NavigationPath()
     @State private var featuredChampions: [Champion] = []
+    @State private var championStatsByName: [String: ChampionStats] = [:]
+    
+    private let championStatsService = ChampionStatsService()
     
     private var filteredChampions: [Champion] {
         viewModel.filteredChampions(matching: searchText)
@@ -44,6 +47,7 @@ struct HomeView: View {
                     } else if searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         SecondSection(
                             champions: featuredChampions,
+                            statsByChampionName: championStatsByName,
                             onChampionTap: { champion in
                                 path.append(HomeRoute.detail(champion))
                             }
@@ -69,6 +73,7 @@ struct HomeView: View {
             }
             .task {
                 await viewModel.loadChampions()
+                await loadChampionStats()
                 refreshFeaturedChampions()
             }
             .onChange(of: viewModel.champions) { _ in
@@ -90,6 +95,17 @@ struct HomeView: View {
     
     private func refreshFeaturedChampions() {
         featuredChampions = Array(viewModel.champions.shuffled().prefix(4))
+    }
+    
+    private func loadChampionStats() async {
+        do {
+            let stats = try await championStatsService.fetchChampionStats()
+            championStatsByName = Dictionary(
+                uniqueKeysWithValues: stats.map { ($0.normalizedChampionName, $0) }
+            )
+        } catch {
+            championStatsByName = [:]
+        }
     }
 }
 
