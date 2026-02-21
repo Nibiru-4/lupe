@@ -14,4 +14,66 @@ export declare class PlayersController {
         };
     }>;
     getMatches(playerId: string): Promise<import("./player-match.entity").PlayerMatch[]>;
+    getMatchDetail(playerId: string, matchId: string): Promise<{
+        matchId: string;
+        gameCreation: string;
+        gameDuration: number;
+        queueId: number;
+        gameMode: string;
+        patch: string;
+        player: {
+            puuid: string;
+            isPlayer: boolean;
+            teamId: number;
+            riotIdGameName: string | null;
+            riotIdTagline: string | null;
+            summonerName: string | null;
+            championName: string;
+            championId: number;
+            win: boolean;
+            kills: number;
+            deaths: number;
+            assists: number;
+            cs: number;
+            visionScore: number;
+            summoner1Id: number;
+            summoner2Id: number;
+            primaryRuneId: number | null;
+            primaryStyleId: number | null;
+            secondaryStyleId: number | null;
+            rankTier: string | null;
+            rankDivision: string | null;
+            rankLp: number | null;
+            items: number[];
+        };
+        teams: {
+            teamId: number;
+            win: boolean;
+            participants: {
+                puuid: string;
+                isPlayer: boolean;
+                teamId: number;
+                riotIdGameName: string | null;
+                riotIdTagline: string | null;
+                summonerName: string | null;
+                championName: string;
+                championId: number;
+                win: boolean;
+                kills: number;
+                deaths: number;
+                assists: number;
+                cs: number;
+                visionScore: number;
+                summoner1Id: number;
+                summoner2Id: number;
+                primaryRuneId: number | null;
+                primaryStyleId: number | null;
+                secondaryStyleId: number | null;
+                rankTier: string | null;
+                rankDivision: string | null;
+                rankLp: number | null;
+                items: number[];
+            }[];
+        }[];
+    }>;
 }

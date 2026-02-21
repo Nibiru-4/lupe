@@ -68,6 +68,14 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'int', array: true, default: '{}' }),
     __metadata("design:type", Array)
 ], PlayerMatch.prototype, "items", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 64, array: true, default: '{}' }),
+    __metadata("design:type", Array)
+], PlayerMatch.prototype, "blueDraft", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 64, array: true, default: '{}' }),
+    __metadata("design:type", Array)
+], PlayerMatch.prototype, "redDraft", void 0);
 exports.PlayerMatch = PlayerMatch = __decorate([
     (0, typeorm_1.Entity)('player_matches'),
     (0, typeorm_1.Index)(['playerId', 'matchId'], { unique: true })

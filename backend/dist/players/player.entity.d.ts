@@ -5,6 +5,10 @@ export declare class Player {
     gameName: string;
     tagLine: string;
     summonerLevel: number | null;
+    profileIconId: number | null;
+    rankTier: string | null;
+    rankDivision: string | null;
+    rankLp: number | null;
     platform: string | null;
     region: string | null;
     lastSyncedAt: Date;

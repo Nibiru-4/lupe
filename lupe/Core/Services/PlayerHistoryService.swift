@@ -22,4 +22,13 @@ final class PlayerHistoryService {
         let response: [PlayerMatchHistory] = try await APIClient.shared.fetch(url: url)
         return response
     }
+
+    func fetchMatchDetail(playerId: String, matchId: String) async throws -> PlayerMatchDetailResponse {
+        guard let url = URL(string: "\(baseURL)/\(playerId)/matches/\(matchId)") else {
+            throw URLError(.badURL)
+        }
+
+        let response: PlayerMatchDetailResponse = try await APIClient.shared.fetch(url: url)
+        return response
+    }
 }

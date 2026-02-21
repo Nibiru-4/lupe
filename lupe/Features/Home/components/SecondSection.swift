@@ -8,9 +8,11 @@
 import SwiftUI
 
 struct SecondSection : View {
+    private let cardWidth: CGFloat = 168
     
     let champions: [Champion]
     let statsByChampionName: [String: ChampionStats]
+    let patchLinks: [PatchNoteLink]
     let onChampionTap: (Champion) -> Void
     
     var body : some View {
@@ -21,7 +23,7 @@ struct SecondSection : View {
             }
             .frame(maxWidth: .infinity,alignment: .leading)
             
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: cardWidth, maximum: cardWidth), spacing: 16)], spacing: 16) {
                 ForEach(champions) { champion in
                     Button {
                         onChampionTap(champion)
@@ -32,6 +34,7 @@ struct SecondSection : View {
                             winRate: statsByChampionName[champion.name.lowercased()]?.winRate,
                             pickRate: statsByChampionName[champion.name.lowercased()]?.pickRate
                         )
+                        .frame(width: cardWidth)
                     }
                     .buttonStyle(.plain)
                 }
@@ -40,7 +43,7 @@ struct SecondSection : View {
             .padding(.horizontal,12)
             
             VStack {
-                PatchComponent(title:"Patch Highlights")
+                PatchComponent(title: String(localized: "home.patch.highlights"), links: patchLinks)
             }
            
         }

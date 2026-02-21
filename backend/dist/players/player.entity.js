@@ -36,6 +36,22 @@ __decorate([
     __metadata("design:type", Object)
 ], Player.prototype, "summonerLevel", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Object)
+], Player.prototype, "profileIconId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 16, nullable: true }),
+    __metadata("design:type", Object)
+], Player.prototype, "rankTier", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 8, nullable: true }),
+    __metadata("design:type", Object)
+], Player.prototype, "rankDivision", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Object)
+], Player.prototype, "rankLp", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 16, nullable: true }),
     __metadata("design:type", Object)
 ], Player.prototype, "platform", void 0);

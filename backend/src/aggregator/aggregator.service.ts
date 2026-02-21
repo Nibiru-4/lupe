@@ -52,26 +52,36 @@ export class AggregatorService implements OnModuleInit, OnModuleDestroy {
     this.inProgress = true;
     try {
       const targetMatches = this.riotService.getTargetMatches();
+      const maxGamesPerChampion = this.configService.get<number>('riot.maxGamesPerChampion', 30);
       const puuids: string[] = [];
       const challengerPuuids = await this.riotService.getChallengerPuuids();
       puuids.push(...challengerPuuids.slice(0, 25));
 
       const matchIdsSet = new Set<string>();
+      let staleRounds = 0;
       for (const puuid of puuids) {
-        try {
-          const ids = await this.riotService.getMatchIdsByPuuid(puuid, 20);
-          for (const id of ids) {
-            matchIdsSet.add(id);
-            if (matchIdsSet.size >= targetMatches) {
+        for (let start = 0; start < 100; start += 20) {
+          try {
+            const before = matchIdsSet.size;
+            const ids = await this.riotService.getMatchIdsByPuuid(puuid, 20, undefined, undefined, start);
+            for (const id of ids) {
+              matchIdsSet.add(id);
+              if (matchIdsSet.size >= targetMatches) {
+                break;
+              }
+            }
+
+            const added = matchIdsSet.size - before;
+            staleRounds = added === 0 ? staleRounds + 1 : 0;
+
+            if (ids.length < 20 || matchIdsSet.size >= targetMatches || staleRounds >= 8) {
               break;
             }
-          }
-          if (matchIdsSet.size >= targetMatches) {
+          } catch {
             break;
           }
-        } catch {
-          continue;
         }
+        if (matchIdsSet.size >= targetMatches || staleRounds >= 8) break;
       }
 
       const matchIds = [...matchIdsSet].slice(0, targetMatches);
@@ -98,7 +108,6 @@ export class AggregatorService implements OnModuleInit, OnModuleDestroy {
 
       for (const match of matches) {
         for (const p of match.info.participants) {
-          participantsSeen += 1;
           const current = byChampion.get(p.championId) ?? {
             championId: p.championId,
             championName: p.championName,
@@ -107,6 +116,12 @@ export class AggregatorService implements OnModuleInit, OnModuleDestroy {
             builds: new Map<string, { count: number; wins: number }>(),
           };
 
+          if (current.games >= maxGamesPerChampion) {
+            byChampion.set(p.championId, current);
+            continue;
+          }
+
+          participantsSeen += 1;
           current.games += 1;
           if (p.win) current.wins += 1;
 

@@ -50,4 +50,10 @@ export class PlayerMatch {
 
   @Column({ type: 'int', array: true, default: '{}' })
   items!: number[];
+
+  @Column({ type: 'varchar', length: 64, array: true, default: '{}' })
+  blueDraft!: string[];
+
+  @Column({ type: 'varchar', length: 64, array: true, default: '{}' })
+  redDraft!: string[];
 }

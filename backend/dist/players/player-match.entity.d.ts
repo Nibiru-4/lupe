@@ -13,4 +13,6 @@ export declare class PlayerMatch {
     gameDuration: number;
     gameCreation: string;
     items: number[];
+    blueDraft: string[];
+    redDraft: string[];
 }

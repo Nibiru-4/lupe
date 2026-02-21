@@ -28,6 +28,9 @@ let PlayersController = class PlayersController {
         await this.playersService.getPlayerById(playerId);
         return this.playersService.getPlayerMatches(playerId);
     }
+    getMatchDetail(playerId, matchId) {
+        return this.playersService.getMatchDetail(playerId, matchId);
+    }
 };
 exports.PlayersController = PlayersController;
 __decorate([
@@ -49,6 +52,17 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], PlayersController.prototype, "getMatches", null);
+__decorate([
+    (0, common_1.Get)(':playerId/matches/:matchId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get a full match detail for a player match' }),
+    (0, swagger_1.ApiParam)({ name: 'playerId' }),
+    (0, swagger_1.ApiParam)({ name: 'matchId' }),
+    __param(0, (0, common_1.Param)('playerId')),
+    __param(1, (0, common_1.Param)('matchId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], PlayersController.prototype, "getMatchDetail", null);
 exports.PlayersController = PlayersController = __decorate([
     (0, swagger_1.ApiTags)('Players'),
     (0, common_1.Controller)('players'),

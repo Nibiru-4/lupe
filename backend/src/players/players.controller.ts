@@ -23,4 +23,12 @@ export class PlayersController {
     await this.playersService.getPlayerById(playerId);
     return this.playersService.getPlayerMatches(playerId);
   }
+
+  @Get(':playerId/matches/:matchId')
+  @ApiOperation({ summary: 'Get a full match detail for a player match' })
+  @ApiParam({ name: 'playerId' })
+  @ApiParam({ name: 'matchId' })
+  getMatchDetail(@Param('playerId') playerId: string, @Param('matchId') matchId: string) {
+    return this.playersService.getMatchDetail(playerId, matchId);
+  }
 }

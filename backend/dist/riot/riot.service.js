@@ -62,11 +62,12 @@ let RiotService = class RiotService {
         const platforms = this.buildPlatformFallbackOrder();
         let lastError;
         for (const platform of platforms) {
-            const url = `https://${platform}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}`;
             try {
-                const summoner = await this.get(url);
+                const summoner = await this.getSummonerByPuuidOnPlatform(puuid, platform);
                 return {
                     summonerLevel: summoner.summonerLevel,
+                    profileIconId: summoner.profileIconId,
+                    summonerId: summoner.id,
                     platform,
                     region: this.regionFromPlatform(platform),
                 };
@@ -80,12 +81,26 @@ let RiotService = class RiotService {
         }
         throw lastError ?? new Error('Summoner not found on any platform');
     }
-    async getMatchIdsByPuuid(puuid, count = 20, queueId, regionOverride) {
+    async getSummonerByPuuidOnPlatform(puuid, platformOverride) {
+        const url = `https://${platformOverride}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}`;
+        return this.get(url);
+    }
+    async getLeagueEntriesBySummonerId(summonerId, platformOverride) {
+        const platform = platformOverride ?? this.platform;
+        const url = `https://${platform}.api.riotgames.com/lol/league/v4/entries/by-summoner/${summonerId}`;
+        return this.get(url);
+    }
+    async getLeagueEntriesByPuuid(puuid, platformOverride) {
+        const platform = platformOverride ?? this.platform;
+        const url = `https://${platform}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}`;
+        return this.get(url);
+    }
+    async getMatchIdsByPuuid(puuid, count = 20, queueId, regionOverride, start = 0) {
         const queueParam = queueId ? `&queue=${queueId}` : '';
         const regions = this.buildMatchRegionFallbackOrder(regionOverride);
         let lastError;
         for (const region of regions) {
-            const url = `https://${region}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=${count}${queueParam}`;
+            const url = `https://${region}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=${start}&count=${count}${queueParam}`;
             try {
                 const matchIds = await this.get(url);
                 if (matchIds.length > 0) {
@@ -123,12 +138,34 @@ let RiotService = class RiotService {
         throw lastError ?? new Error(`Match not found: ${matchId}`);
     }
     async get(url) {
-        const response = await (0, rxjs_1.firstValueFrom)(this.httpService.get(url, {
-            headers: {
-                'X-Riot-Token': this.apiKey,
-            },
-        }));
-        return response.data;
+        const maxAttempts = 3;
+        for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+            try {
+                const response = await (0, rxjs_1.firstValueFrom)(this.httpService.get(url, {
+                    headers: {
+                        'X-Riot-Token': this.apiKey,
+                    },
+                }));
+                return response.data;
+            }
+            catch (error) {
+                if (!(error instanceof axios_2.AxiosError)) {
+                    throw error;
+                }
+                const status = error.response?.status;
+                const retryAfterHeader = error.response?.headers?.['retry-after'];
+                const retryAfterSeconds = Number(retryAfterHeader);
+                const isRetriable = status === 429 || status === 503;
+                if (!isRetriable || attempt === maxAttempts) {
+                    throw error;
+                }
+                const delayMs = Number.isFinite(retryAfterSeconds)
+                    ? Math.max(1000, retryAfterSeconds * 1000)
+                    : 1200 * attempt;
+                await this.sleep(delayMs);
+            }
+        }
+        throw new Error('Unexpected retry loop termination');
     }
     buildPlatformFallbackOrder() {
         const byRegion = {
@@ -174,6 +211,9 @@ let RiotService = class RiotService {
         if (!(error instanceof axios_2.AxiosError))
             return false;
         return error.response?.status === 404;
+    }
+    async sleep(ms) {
+        await new Promise((resolve) => setTimeout(resolve, ms));
     }
 };
 exports.RiotService = RiotService;

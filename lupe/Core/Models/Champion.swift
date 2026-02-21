@@ -29,4 +29,12 @@ struct Champion : Codable, Identifiable, Hashable {
     static func itemIconURL(for itemId: Int) -> URL? {
         URL(string: "https://ddragon.leagueoflegends.com/cdn/\(Self.cdnVersion)/img/item/\(itemId).png")
     }
+
+    static func championIconURL(for championId: String) -> URL? {
+        URL(string: "https://ddragon.leagueoflegends.com/cdn/\(Self.cdnVersion)/img/champion/\(championId).png")
+    }
+
+    static func summonerIconURL(for iconId: Int) -> URL? {
+        URL(string: "https://ddragon.leagueoflegends.com/cdn/\(Self.cdnVersion)/img/profileicon/\(iconId).png")
+    }
 }

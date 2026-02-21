@@ -4,11 +4,14 @@ import { AggregatorService } from '../src/aggregator/aggregator.service';
 import { ChampionStatsController } from '../src/champion-stats/champion-stats.controller';
 import { ChampionStatsService } from '../src/champion-stats/champion-stats.service';
 import { HealthController } from '../src/health.controller';
+import { PlayersController } from '../src/players/players.controller';
+import { PlayersService } from '../src/players/players.service';
 
 describe('Routes (controller-level)', () => {
   let healthController: HealthController;
   let championStatsController: ChampionStatsController;
   let aggregatorController: AggregatorController;
+  let playersController: PlayersController;
 
   const championStatsServiceMock = {
     listChampionStats: jest.fn(),
@@ -19,9 +22,16 @@ describe('Routes (controller-level)', () => {
     runAggregation: jest.fn(),
   };
 
+  const playersServiceMock = {
+    searchAndSyncPlayer: jest.fn(),
+    getPlayerById: jest.fn(),
+    getPlayerMatches: jest.fn(),
+    getMatchDetail: jest.fn(),
+  };
+
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      controllers: [HealthController, ChampionStatsController, AggregatorController],
+      controllers: [HealthController, ChampionStatsController, AggregatorController, PlayersController],
       providers: [
         {
           provide: ChampionStatsService,
@@ -31,12 +41,17 @@ describe('Routes (controller-level)', () => {
           provide: AggregatorService,
           useValue: aggregatorServiceMock,
         },
+        {
+          provide: PlayersService,
+          useValue: playersServiceMock,
+        },
       ],
     }).compile();
 
     healthController = moduleRef.get(HealthController);
     championStatsController = moduleRef.get(ChampionStatsController);
     aggregatorController = moduleRef.get(AggregatorController);
+    playersController = moduleRef.get(PlayersController);
   });
 
   beforeEach(() => {
@@ -83,5 +98,25 @@ describe('Routes (controller-level)', () => {
 
     expect(aggregatorServiceMock.runAggregation).toHaveBeenCalledWith('manual');
     expect(result).toEqual({ ok: true });
+  });
+
+  it('GET /players/:playerId/matches forwards call to players service', async () => {
+    playersServiceMock.getPlayerById.mockResolvedValueOnce({ id: 'p1' });
+    playersServiceMock.getPlayerMatches.mockResolvedValueOnce([{ matchId: 'NA1_1' }]);
+
+    const result = await playersController.getMatches('p1');
+
+    expect(playersServiceMock.getPlayerById).toHaveBeenCalledWith('p1');
+    expect(playersServiceMock.getPlayerMatches).toHaveBeenCalledWith('p1');
+    expect(result).toEqual([{ matchId: 'NA1_1' }]);
+  });
+
+  it('GET /players/:playerId/matches/:matchId forwards call to players service', async () => {
+    playersServiceMock.getMatchDetail.mockResolvedValueOnce({ matchId: 'NA1_1' });
+
+    const result = await playersController.getMatchDetail('p1', 'NA1_1');
+
+    expect(playersServiceMock.getMatchDetail).toHaveBeenCalledWith('p1', 'NA1_1');
+    expect(result).toEqual({ matchId: 'NA1_1' });
   });
 });

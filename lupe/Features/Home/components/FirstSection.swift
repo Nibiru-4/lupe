@@ -13,7 +13,7 @@ struct FirstSection : View {
     
     var body : some View {
         CustomTextField(
-            placeholder: "Search Champions or Users...",
+            placeholder: String(localized: "home.search.placeholder"),
             icon:"magnifyingglass",
             text: $text,
             onSubmit: onSubmit

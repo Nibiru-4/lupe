@@ -7,6 +7,8 @@ export declare class PlayersService {
     private readonly playersRepo;
     private readonly playerMatchesRepo;
     private readonly riotService;
+    private readonly rankCache;
+    private readonly rankCacheTtlMs;
     constructor(playersRepo: Repository<Player>, playerMatchesRepo: Repository<PlayerMatch>, riotService: RiotService);
     searchAndSyncPlayer(input: SearchPlayerDto): Promise<{
         player: Player;
@@ -19,7 +21,74 @@ export declare class PlayersService {
         };
     }>;
     getPlayerMatches(playerId: string): Promise<PlayerMatch[]>;
+    getMatchDetail(playerId: string, matchId: string): Promise<{
+        matchId: string;
+        gameCreation: string;
+        gameDuration: number;
+        queueId: number;
+        gameMode: string;
+        patch: string;
+        player: {
+            puuid: string;
+            isPlayer: boolean;
+            teamId: number;
+            riotIdGameName: string | null;
+            riotIdTagline: string | null;
+            summonerName: string | null;
+            championName: string;
+            championId: number;
+            win: boolean;
+            kills: number;
+            deaths: number;
+            assists: number;
+            cs: number;
+            visionScore: number;
+            summoner1Id: number;
+            summoner2Id: number;
+            primaryRuneId: number | null;
+            primaryStyleId: number | null;
+            secondaryStyleId: number | null;
+            rankTier: string | null;
+            rankDivision: string | null;
+            rankLp: number | null;
+            items: number[];
+        };
+        teams: {
+            teamId: number;
+            win: boolean;
+            participants: {
+                puuid: string;
+                isPlayer: boolean;
+                teamId: number;
+                riotIdGameName: string | null;
+                riotIdTagline: string | null;
+                summonerName: string | null;
+                championName: string;
+                championId: number;
+                win: boolean;
+                kills: number;
+                deaths: number;
+                assists: number;
+                cs: number;
+                visionScore: number;
+                summoner1Id: number;
+                summoner2Id: number;
+                primaryRuneId: number | null;
+                primaryStyleId: number | null;
+                secondaryStyleId: number | null;
+                rankTier: string | null;
+                rankDivision: string | null;
+                rankLp: number | null;
+                items: number[];
+            }[];
+        }[];
+    }>;
     private upsertPlayer;
     private syncRecentMatches;
     getPlayerById(playerId: string): Promise<Player>;
+    private mapParticipant;
+    private extractPatch;
+    private resolveBestRank;
+    private buildParticipantRankMap;
+    private platformFromMatchId;
 }

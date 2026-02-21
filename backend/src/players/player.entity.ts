@@ -20,6 +20,18 @@ export class Player {
   @Column({ type: 'int', nullable: true })
   summonerLevel!: number | null;
 
+  @Column({ type: 'int', nullable: true })
+  profileIconId!: number | null;
+
+  @Column({ type: 'varchar', length: 16, nullable: true })
+  rankTier!: string | null;
+
+  @Column({ type: 'varchar', length: 8, nullable: true })
+  rankDivision!: string | null;
+
+  @Column({ type: 'int', nullable: true })
+  rankLp!: number | null;
+
   @Column({ type: 'varchar', length: 16, nullable: true })
   platform!: string | null;
 

@@ -10,6 +10,7 @@ import SwiftUI
 fileprivate enum HomeRoute: Hashable {
     case detail(Champion)
     case notFound(String)
+    case playerHistory(gameName: String, tagLine: String)
 }
 
 struct HomeView: View {
@@ -19,8 +20,10 @@ struct HomeView: View {
     @State private var path = NavigationPath()
     @State private var featuredChampions: [Champion] = []
     @State private var championStatsByName: [String: ChampionStats] = [:]
+    @State private var patchLinks: [PatchNoteLink] = []
     
     private let championStatsService = ChampionStatsService()
+    private let patchNotesService = PatchNotesService()
     
     private var filteredChampions: [Champion] {
         viewModel.filteredChampions(matching: searchText)
@@ -48,12 +51,17 @@ struct HomeView: View {
                         SecondSection(
                             champions: featuredChampions,
                             statsByChampionName: championStatsByName,
+                            patchLinks: patchLinks,
                             onChampionTap: { champion in
                                 path.append(HomeRoute.detail(champion))
                             }
                         )
                     } else {
-                        SearchResultsSection(champions: filteredChampions, path: $path)
+                        SearchResultsSection(
+                            champions: filteredChampions,
+                            playerQuery: parsePlayerQuery(from: searchText),
+                            path: $path
+                        )
                     }
                 }
                 .frame(maxWidth: .infinity,maxHeight: .infinity ,alignment: .topLeading)
@@ -69,11 +77,14 @@ struct HomeView: View {
                     ChampionDetailView(champion: champion)
                 case .notFound(let query):
                     ChampionNotFoundView(query: query)
+                case .playerHistory(let gameName, let tagLine):
+                    PlayerHistoryView(gameName: gameName, tagLine: tagLine)
                 }
             }
             .task {
                 await viewModel.loadChampions()
                 await loadChampionStats()
+                await loadPatchLinks()
                 refreshFeaturedChampions()
             }
             .onChange(of: viewModel.champions) { _ in
@@ -88,13 +99,15 @@ struct HomeView: View {
         
         if let champion = viewModel.exactMatch(for: query) {
             path.append(HomeRoute.detail(champion))
+        } else if let playerQuery = parsePlayerQuery(from: query) {
+            path.append(HomeRoute.playerHistory(gameName: playerQuery.gameName, tagLine: playerQuery.tagLine))
         } else {
             path.append(HomeRoute.notFound(query))
         }
     }
     
     private func refreshFeaturedChampions() {
-        featuredChampions = Array(viewModel.champions.shuffled().prefix(4))
+        featuredChampions = FeaturedChampionsStore.featuredChampions(from: viewModel.champions)
     }
     
     private func loadChampionStats() async {
@@ -107,6 +120,26 @@ struct HomeView: View {
             championStatsByName = [:]
         }
     }
+    
+    private func loadPatchLinks() async {
+        do {
+            patchLinks = try await patchNotesService.fetchLatestPatchLinks(limit: 4)
+        } catch {
+            patchLinks = []
+        }
+    }
+
+    private func parsePlayerQuery(from raw: String) -> (gameName: String, tagLine: String)? {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        let parts = trimmed.split(separator: "#", maxSplits: 1).map(String.init)
+        guard parts.count == 2 else { return nil }
+
+        let gameName = parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
+        let tagLine = parts[1].trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !gameName.isEmpty, !tagLine.isEmpty else { return nil }
+        return (gameName, tagLine)
+    }
 }
 
 private struct SearchResultsSection: View {
@@ -114,16 +147,46 @@ private struct SearchResultsSection: View {
     private let cardBackground = Color(red: 0x1a/255, green: 0x1b/255, blue: 0x27/255)
     
     let champions: [Champion]
+    let playerQuery: (gameName: String, tagLine: String)?
     @Binding var path: NavigationPath
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Filtered results")
+            Text("home.search.filtered_results")
                 .font(.headline)
+
+            if let playerQuery {
+                Button {
+                    path.append(HomeRoute.playerHistory(gameName: playerQuery.gameName, tagLine: playerQuery.tagLine))
+                } label: {
+                    HStack {
+                        Image(systemName: "person.crop.circle.badge.magnifyingglass")
+                            .foregroundColor(.white)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("home.search.search_player")
+                                .foregroundColor(.white)
+                                .bold()
+                            Text("\(playerQuery.gameName)#\(playerQuery.tagLine)")
+                                .font(.subheadline)
+                                .foregroundColor(.white.opacity(0.75))
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.white.opacity(0.6))
+                    }
+                    .padding(12)
+                    .background(cardBackground)
+                    .cornerRadius(10)
+                    .shadow(radius: 4)
+                }
+                .buttonStyle(.plain)
+            }
             
             if champions.isEmpty {
-                Text("No filtered results.")
-                    .foregroundColor(.secondary)
+                if playerQuery == nil {
+                    Text("home.search.no_results")
+                        .foregroundColor(.secondary)
+                }
             } else {
                 ForEach(champions) { champion in
                     Button {

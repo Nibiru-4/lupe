@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct CustomCard: View {
+    private let cardHeight: CGFloat = 248
+    private let imageSize: CGFloat = 92
     
     let title: String
     let urlImage : String
@@ -15,18 +17,18 @@ struct CustomCard: View {
                 switch phase {
                 case .empty:
                     ProgressView()
-                        .frame(width: 100, height: 100)
+                        .frame(width: imageSize, height: imageSize)
                 case .success(let image):
                     image
                         .resizable()
                         .scaledToFill()
-                        .frame(width: 100, height: 100)
+                        .frame(width: imageSize, height: imageSize)
                         .clipShape(Circle())
                 case .failure:
                     Image(systemName: "photo")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 100, height: 100)
+                        .frame(width: imageSize, height: imageSize)
                         .foregroundColor(.gray)
                 @unknown default:
                     EmptyView()
@@ -36,25 +38,27 @@ struct CustomCard: View {
             Text(title)
                 .font(.headline)
             
-            Text("description")
+            Text("home.meta.card.subtitle")
                 .font(.subheadline)
                 .foregroundColor(.gray)
             
             HStack(spacing: 16) {
-                Text("Win Rate")
+                Text("stats.win_rate")
                 Spacer()
                 Text(formattedPercent(winRate))
                     .bold()
             }
             
             HStack(spacing: 16) {
-                Text("Pick Rate")
+                Text("stats.pick_rate")
                 Spacer()
                 Text(formattedPercent(pickRate))
                     .bold()
             }
         }
         .padding()
+        .frame(maxWidth: .infinity)
+        .frame(height: cardHeight)
         .background(Color(red: 0x1a/255, green: 0x1b/255, blue: 0x27/255))
         .cornerRadius(12)
         .shadow(radius: 4)

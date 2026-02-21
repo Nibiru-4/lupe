@@ -13,6 +13,7 @@ declare const _default: () => {
         platform: string;
         region: string;
         targetMatches: number;
+        maxGamesPerChampion: number;
         aggregateEveryMinutes: number;
     };
 };
